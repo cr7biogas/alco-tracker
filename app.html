@@ -377,7 +377,18 @@ onValue(ref(db,'alco'),snap=>{
     </div>`).join(''):'<div class="empty">Nessun partecipante</div>';
 });
 
-onValue(ref(db,`alco/${uid}`),snap=>{if(snap.exists())update(snap.val());});
+let lastData=null;
+onValue(ref(db,`alco/${uid}`),snap=>{
+  if(snap.exists()){
+    lastData=snap.val();
+    update(lastData);
+  }
+});
+
+// Auto-refresh ogni 30 secondi per ricalcolare il BAC (che cambia nel tempo)
+setInterval(()=>{
+  if(lastData)update(lastData);
+},30000);
 </script>
 </body>
 </html>
