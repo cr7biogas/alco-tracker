@@ -2,432 +2,310 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>🍺 AlcoTracker - Dashboard</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🍺 AlcoTracker</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);color:#fff;min-height:100vh;padding:16px;padding-bottom:100px}
-.header{text-align:center;padding:16px 0;border-bottom:1px solid #ffffff22;margin-bottom:16px}
-.header h1{font-size:24px}
-.user-info{color:#888;font-size:14px;margin-top:4px}
-.bac-display{background:linear-gradient(135deg,#0f3460,#16213e);border-radius:20px;padding:24px;text-align:center;margin-bottom:16px;border:2px solid #ffffff22}
-.bac-value{font-size:64px;font-weight:800;margin:8px 0}
+body{font-family:-apple-system,sans-serif;background:#0f0f1a;color:#fff;min-height:100vh;overflow-x:hidden}
+.top{background:linear-gradient(135deg,#1a1a2e,#0f0f1a);padding:12px 16px;position:sticky;top:0;z-index:100;border-bottom:1px solid #333}
+.top h1{font-size:18px;display:flex;align-items:center;gap:8px}
+.top h1 span{font-size:12px;color:#888;font-weight:400}
+.bac-card{background:linear-gradient(135deg,#16213e,#1a1a2e);margin:12px;border-radius:16px;padding:20px;text-align:center}
+.bac-num{font-size:72px;font-weight:800;line-height:1}
 .bac-ok{color:#2ecc71}
-.bac-warn{color:#f39c12}
+.bac-warn{color:#f1c40f}
 .bac-danger{color:#e74c3c}
-.bac-extreme{color:#9b59b6;animation:pulse 1s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
-.bac-label{color:#888;font-size:14px}
-.drive-time{background:#ffffff11;border-radius:12px;padding:16px;margin-top:12px;font-size:14px}
-.drive-time.can-drive{border:2px solid #2ecc71;color:#2ecc71}
-.drive-time.wait{border:2px solid #e74c3c}
-.chart-container{background:#ffffff11;border-radius:16px;padding:16px;margin-bottom:16px}
-.section{background:#ffffff11;border-radius:16px;padding:16px;margin-bottom:16px}
-.section h3{margin-bottom:12px;font-size:16px;display:flex;align-items:center;gap:8px}
-.drinks-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-height:300px;overflow-y:auto}
-.drink-btn{padding:12px 8px;border-radius:10px;border:1px solid #ffffff22;background:#ffffff11;color:#fff;font-size:11px;cursor:pointer;text-align:center;transition:all .2s}
-.drink-btn:hover{background:#ffffff22;transform:scale(1.05)}
-.drink-btn:active{transform:scale(0.95)}
-.drink-btn .emoji{font-size:20px;display:block;margin-bottom:4px}
-.drink-btn .alc{color:#e94560;font-size:10px}
-.food-btns{display:flex;gap:8px}
-.food-btn{flex:1;padding:12px;border-radius:10px;border:2px solid #ffffff22;background:transparent;color:#fff;cursor:pointer;transition:all .2s}
+.bac-extreme{color:#9b59b6;animation:pulse .8s infinite}
+@keyframes pulse{50%{opacity:.5}}
+.bac-label{color:#666;font-size:13px;margin-top:4px}
+.drive-box{margin-top:12px;padding:12px;border-radius:10px;font-size:14px;font-weight:600}
+.drive-ok{background:#2ecc7122;color:#2ecc71;border:1px solid #2ecc71}
+.drive-wait{background:#e74c3c22;color:#e74c3c;border:1px solid #e74c3c}
+.chart-wrap{margin:0 12px;background:#ffffff08;border-radius:12px;padding:12px}
+.tabs{display:flex;margin:12px;gap:6px}
+.tab{flex:1;padding:12px;border-radius:10px;border:none;font-size:14px;font-weight:600;cursor:pointer;transition:.2s}
+.tab.active{background:#e94560;color:#fff}
+.tab:not(.active){background:#ffffff11;color:#888}
+.panel{display:none;margin:0 12px 80px}
+.panel.active{display:block}
+.food-row{display:flex;gap:8px;margin-bottom:12px}
+.food-btn{flex:1;padding:14px 8px;border-radius:10px;border:2px solid #333;background:transparent;color:#fff;font-size:13px;cursor:pointer}
 .food-btn.active{border-color:#2ecc71;background:#2ecc7122}
-.history{max-height:200px;overflow-y:auto}
-.history-item{display:flex;justify-content:space-between;padding:10px;border-bottom:1px solid #ffffff11;font-size:13px}
-.history-item .time{color:#888}
-.remove-btn{background:#e74c3c;border:none;color:#fff;padding:4px 8px;border-radius:6px;cursor:pointer;font-size:11px}
-.bottom-bar{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(to top,#1a1a2e,transparent);padding:20px;text-align:center}
-.reset-btn{padding:12px 24px;border-radius:10px;border:1px solid #e74c3c;background:transparent;color:#e74c3c;cursor:pointer;font-size:14px}
-.search-box{width:100%;padding:10px;border-radius:8px;border:1px solid #ffffff33;background:#ffffff11;color:#fff;margin-bottom:12px;font-size:14px}
-.search-box::placeholder{color:#666}
+.search{width:100%;padding:12px;border-radius:10px;border:1px solid #333;background:#ffffff11;color:#fff;font-size:15px;margin-bottom:10px}
+.drinks{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;max-height:50vh;overflow-y:auto;padding-bottom:20px}
+.drink{padding:14px 10px;border-radius:12px;background:#ffffff11;border:none;color:#fff;text-align:center;cursor:pointer;transition:.15s}
+.drink:active{transform:scale(.95);background:#ffffff22}
+.drink .em{font-size:28px;display:block;margin-bottom:4px}
+.drink .nm{font-size:12px;line-height:1.2}
+.drink .al{color:#e94560;font-size:11px;margin-top:2px}
+.hist-item{display:flex;justify-content:space-between;align-items:center;padding:12px;background:#ffffff08;border-radius:10px;margin-bottom:6px}
+.hist-item .info{font-size:14px}
+.hist-item .time{color:#666;font-size:12px}
+.hist-item .del{background:#e74c3c;border:none;color:#fff;width:28px;height:28px;border-radius:8px;cursor:pointer}
+.bottom{position:fixed;bottom:0;left:0;right:0;padding:12px;background:linear-gradient(to top,#0f0f1a 60%,transparent)}
+.reset{width:100%;padding:14px;border-radius:12px;border:1px solid #e94560;background:transparent;color:#e94560;font-size:15px;font-weight:600;cursor:pointer}
+.empty{text-align:center;color:#666;padding:40px}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>🍺 AlcoTracker</h1>
-  <div class="user-info" id="userInfo">Caricamento...</div>
+<div class="top">
+  <h1>🍺 AlcoTracker <span id="userName"></span></h1>
 </div>
 
-<div class="bac-display">
-  <div class="bac-label">TASSO ALCOLEMICO STIMATO</div>
-  <div class="bac-value bac-ok" id="bacValue">0.00</div>
-  <div class="bac-label">g/L</div>
-  <div class="drive-time can-drive" id="driveTime">
-    🚗 Puoi guidare!
+<div class="bac-card">
+  <div class="bac-num bac-ok" id="bac">0.00</div>
+  <div class="bac-label">g/L nel sangue</div>
+  <div class="drive-box drive-ok" id="drive">🚗 Puoi guidare!</div>
+</div>
+
+<div class="chart-wrap">
+  <canvas id="chart" height="120"></canvas>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('add')">➕ Aggiungi</button>
+  <button class="tab" onclick="showTab('hist')">📜 Cronologia</button>
+</div>
+
+<div class="panel active" id="panel-add">
+  <div class="food-row">
+    <button class="food-btn" data-f="vuoto" onclick="setFood('vuoto')">😶<br>Digiuno</button>
+    <button class="food-btn active" data-f="medio" onclick="setFood('medio')">🍕<br>Medio</button>
+    <button class="food-btn" data-f="pieno" onclick="setFood('pieno')">🍝<br>Sazio</button>
   </div>
+  <input type="text" class="search" id="search" placeholder="🔍 Cerca bevanda..." oninput="filter()">
+  <div class="drinks" id="drinks"></div>
 </div>
 
-<div class="chart-container">
-  <canvas id="bacChart" height="150"></canvas>
+<div class="panel" id="panel-hist">
+  <div id="hist"><div class="empty">Nessuna bevanda</div></div>
 </div>
 
-<div class="section">
-  <h3>🍽️ Quanto hai mangiato?</h3>
-  <div class="food-btns">
-    <button class="food-btn" data-food="vuoto" onclick="setFood('vuoto')">😶 Vuoto</button>
-    <button class="food-btn active" data-food="medio" onclick="setFood('medio')">🍕 Medio</button>
-    <button class="food-btn" data-food="pieno" onclick="setFood('pieno')">🍝 Pieno</button>
-  </div>
-</div>
-
-<div class="section">
-  <h3>🍺 Aggiungi bevanda</h3>
-  <input type="text" class="search-box" id="searchDrink" placeholder="🔍 Cerca bevanda..." oninput="filterDrinks()">
-  <div class="drinks-grid" id="drinksGrid"></div>
-</div>
-
-<div class="section">
-  <h3>📜 Cronologia</h3>
-  <div class="history" id="history">
-    <p style="color:#888;text-align:center;padding:20px">Nessuna bevanda registrata</p>
-  </div>
-</div>
-
-<div class="bottom-bar">
-  <button class="reset-btn" onclick="resetSession()">🔄 Nuova Sessione</button>
+<div class="bottom">
+  <button class="reset" onclick="reset()">🔄 Nuova Sessione</button>
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, get, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import{getDatabase,ref,set,onValue,remove}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBxYLAaFJqFxHkZ2CVU3sFwUCEp60gis2U",
-  authDomain: "copilota-6d94a.firebaseapp.com",
-  databaseURL: "https://copilota-6d94a-default-rtdb.firebaseio.com",
-  projectId: "copilota-6d94a"
-};
+const db=getDatabase(initializeApp({
+  apiKey:"AIzaSyBxYLAaFJqFxHkZ2CVU3sFwUCEp60gis2U",
+  databaseURL:"https://copilota-6d94a-default-rtdb.firebaseio.com",
+  projectId:"copilota-6d94a"
+}));
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-// 50 alcolici italiani comuni
-const DRINKS = [
-  { name: "Birra piccola", emoji: "🍺", ml: 200, alc: 5 },
-  { name: "Birra media", emoji: "🍺", ml: 400, alc: 5 },
-  { name: "Birra grande", emoji: "🍺", ml: 500, alc: 5 },
-  { name: "Birra doppio malto", emoji: "🍺", ml: 400, alc: 8 },
-  { name: "Vino rosso", emoji: "🍷", ml: 150, alc: 13 },
-  { name: "Vino bianco", emoji: "🥂", ml: 150, alc: 12 },
-  { name: "Prosecco", emoji: "🥂", ml: 150, alc: 11 },
-  { name: "Spritz", emoji: "🍹", ml: 200, alc: 8 },
-  { name: "Spritz Aperol", emoji: "🧡", ml: 200, alc: 8 },
-  { name: "Spritz Campari", emoji: "❤️", ml: 200, alc: 10 },
-  { name: "Negroni", emoji: "🍸", ml: 90, alc: 24 },
-  { name: "Negroni Sbagliato", emoji: "🍸", ml: 120, alc: 16 },
-  { name: "Americano", emoji: "🍸", ml: 120, alc: 14 },
-  { name: "Gin Tonic", emoji: "🍸", ml: 200, alc: 12 },
-  { name: "Gin Lemon", emoji: "🍋", ml: 200, alc: 10 },
-  { name: "Mojito", emoji: "🍹", ml: 250, alc: 10 },
-  { name: "Cuba Libre", emoji: "🥃", ml: 250, alc: 10 },
-  { name: "Moscow Mule", emoji: "🍹", ml: 200, alc: 10 },
-  { name: "Whisky liscio", emoji: "🥃", ml: 40, alc: 40 },
-  { name: "Whisky cola", emoji: "🥃", ml: 200, alc: 10 },
-  { name: "Rum liscio", emoji: "🥃", ml: 40, alc: 40 },
-  { name: "Vodka liscia", emoji: "🍸", ml: 40, alc: 40 },
-  { name: "Vodka Red Bull", emoji: "⚡", ml: 250, alc: 8 },
-  { name: "Tequila shot", emoji: "🌵", ml: 40, alc: 40 },
-  { name: "Limoncello", emoji: "🍋", ml: 40, alc: 30 },
-  { name: "Grappa", emoji: "🍇", ml: 40, alc: 40 },
-  { name: "Amaro", emoji: "🍂", ml: 40, alc: 30 },
-  { name: "Amaro Montenegro", emoji: "🍂", ml: 40, alc: 23 },
-  { name: "Fernet", emoji: "🍂", ml: 40, alc: 39 },
-  { name: "Jagermeister", emoji: "🦌", ml: 40, alc: 35 },
-  { name: "Sambuca", emoji: "⭐", ml: 40, alc: 38 },
-  { name: "Amaretto", emoji: "🥜", ml: 40, alc: 28 },
-  { name: "Baileys", emoji: "🥛", ml: 50, alc: 17 },
-  { name: "Martini Bianco", emoji: "🍸", ml: 80, alc: 15 },
-  { name: "Martini Rosso", emoji: "🍸", ml: 80, alc: 15 },
-  { name: "Campari soda", emoji: "❤️", ml: 100, alc: 10 },
-  { name: "Aperol soda", emoji: "🧡", ml: 100, alc: 8 },
-  { name: "Cynar", emoji: "🌿", ml: 40, alc: 16.5 },
-  { name: "Mirto", emoji: "🫐", ml: 40, alc: 30 },
-  { name: "Nocino", emoji: "🌰", ml: 40, alc: 40 },
-  { name: "Strega", emoji: "✨", ml: 40, alc: 40 },
-  { name: "Vecchia Romagna", emoji: "🥃", ml: 40, alc: 40 },
-  { name: "Cognac", emoji: "🥃", ml: 40, alc: 40 },
-  { name: "Champagne", emoji: "🍾", ml: 150, alc: 12 },
-  { name: "Spumante", emoji: "🍾", ml: 150, alc: 11 },
-  { name: "Sangria", emoji: "🍷", ml: 200, alc: 8 },
-  { name: "Long Island", emoji: "🍹", ml: 300, alc: 22 },
-  { name: "Sex on the Beach", emoji: "🏖️", ml: 250, alc: 10 },
-  { name: "Pina Colada", emoji: "🥥", ml: 250, alc: 12 },
-  { name: "Caipirinha", emoji: "🍹", ml: 200, alc: 15 }
+const DRINKS=[
+  {n:"Birra 33cl",e:"🍺",ml:330,a:5},
+  {n:"Birra 50cl",e:"🍺",ml:500,a:5},
+  {n:"Birra doppio malto",e:"🍺",ml:400,a:8},
+  {n:"Vino rosso",e:"🍷",ml:150,a:13.5},
+  {n:"Vino bianco",e:"🥂",ml:150,a:12},
+  {n:"Prosecco",e:"🥂",ml:150,a:11},
+  {n:"Spritz Aperol",e:"🧡",ml:200,a:8},
+  {n:"Spritz Campari",e:"❤️",ml:200,a:11},
+  {n:"Negroni",e:"🍸",ml:90,a:25},
+  {n:"Gin Tonic",e:"🍸",ml:200,a:12},
+  {n:"Mojito",e:"🍹",ml:250,a:10},
+  {n:"Cuba Libre",e:"🥃",ml:250,a:10},
+  {n:"Moscow Mule",e:"🍹",ml:200,a:10},
+  {n:"Whisky liscio",e:"🥃",ml:40,a:40},
+  {n:"Rum liscio",e:"🥃",ml:40,a:40},
+  {n:"Vodka liscia",e:"🍸",ml:40,a:40},
+  {n:"Vodka RedBull",e:"⚡",ml:250,a:8},
+  {n:"Tequila shot",e:"🌵",ml:40,a:40},
+  {n:"Limoncello",e:"🍋",ml:40,a:30},
+  {n:"Grappa",e:"🍇",ml:40,a:42},
+  {n:"Amaro",e:"🍂",ml:50,a:30},
+  {n:"Jagermeister",e:"🦌",ml:40,a:35},
+  {n:"Sambuca",e:"⭐",ml:40,a:38},
+  {n:"Long Island",e:"🍹",ml:300,a:22},
+  {n:"Champagne",e:"🍾",ml:150,a:12},
+  {n:"Sangria",e:"🍷",ml:200,a:8},
+  {n:"Caipirinha",e:"🍹",ml:200,a:15},
+  {n:"Sex on Beach",e:"🏖️",ml:250,a:10},
+  {n:"Margarita",e:"🍸",ml:150,a:13},
+  {n:"Aperol Soda",e:"🧡",ml:150,a:8}
 ];
 
-let userId = localStorage.getItem('alcoTrackerId');
-let userName = localStorage.getItem('alcoTrackerName');
-let userData = null;
-let chart = null;
+let uid=localStorage.getItem('alcoId');
+let uname=localStorage.getItem('alcoName');
+if(!uid){location.href='index.html';}
+document.getElementById('userName').textContent=uname;
 
-if (!userId) {
-  window.location.href = 'index.html';
+let chart;
+const ctx=document.getElementById('chart').getContext('2d');
+
+function render(list){
+  document.getElementById('drinks').innerHTML=list.map((d,i)=>`
+    <button class="drink" onclick="add(${DRINKS.indexOf(d)})">
+      <span class="em">${d.e}</span>
+      <span class="nm">${d.n}</span>
+      <span class="al">${d.a}% · ${d.ml}ml</span>
+    </button>`).join('');
 }
+render(DRINKS);
 
-// Render drinks grid
-function renderDrinks(filter = '') {
-  const grid = document.getElementById('drinksGrid');
-  const filtered = DRINKS.filter(d => d.name.toLowerCase().includes(filter.toLowerCase()));
-  grid.innerHTML = filtered.map((d, i) => `
-    <button class="drink-btn" onclick="addDrink(${DRINKS.indexOf(d)})">
-      <span class="emoji">${d.emoji}</span>
-      ${d.name}
-      <span class="alc">${d.alc}% · ${d.ml}ml</span>
-    </button>
-  `).join('');
-}
+window.filter=()=>{
+  const q=document.getElementById('search').value.toLowerCase();
+  render(DRINKS.filter(d=>d.n.toLowerCase().includes(q)));
+};
 
-window.filterDrinks = function() {
-  const search = document.getElementById('searchDrink').value;
-  renderDrinks(search);
-}
+window.showTab=(t)=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+  document.querySelector(`.tab:nth-child(${t==='add'?1:2})`).classList.add('active');
+  document.getElementById('panel-'+t).classList.add('active');
+};
 
-// Add drink
-window.addDrink = async function(index) {
-  const drink = DRINKS[index];
-  const drinkId = 'drink_' + Date.now();
-  
-  await set(ref(db, `alco_users/${userId}/drinks/${drinkId}`), {
-    name: drink.name,
-    emoji: drink.emoji,
-    ml: drink.ml,
-    alc: drink.alc,
-    gramsAlcohol: (drink.ml * (drink.alc / 100) * 0.789),
-    timestamp: Date.now()
+window.setFood=async(f)=>{
+  document.querySelectorAll('.food-btn').forEach(b=>b.classList.toggle('active',b.dataset.f===f));
+  await set(ref(db,`alco/${uid}/food`),f);
+};
+
+window.add=async(i)=>{
+  const d=DRINKS[i];
+  const grams=d.ml*(d.a/100)*0.789;
+  await set(ref(db,`alco/${uid}/drinks/d${Date.now()}`),{
+    n:d.n,e:d.e,g:grams,t:Date.now()
   });
-  
-  // Visual feedback
-  document.getElementById('searchDrink').value = '';
-  renderDrinks();
-}
+};
 
-// Remove drink
-window.removeDrink = async function(drinkId) {
-  await remove(ref(db, `alco_users/${userId}/drinks/${drinkId}`));
-}
+window.del=async(id)=>{await remove(ref(db,`alco/${uid}/drinks/${id}`));};
 
-// Set food level
-window.setFood = async function(level) {
-  document.querySelectorAll('.food-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector(`[data-food="${level}"]`).classList.add('active');
-  await set(ref(db, `alco_users/${userId}/food`), level);
-}
+window.reset=()=>{
+  if(confirm('Nuova sessione?')){
+    localStorage.clear();
+    location.href='index.html';
+  }
+};
 
-// Calculate BAC using Widmark formula
-function calculateBAC(userData) {
-  if (!userData.drinks) return { current: 0, timeline: [] };
+// FORMULA WIDMARK MIGLIORATA con curva di assorbimento
+function calcBAC(data){
+  if(!data||!data.drinks)return{now:0,pts:[]};
   
-  const drinks = Object.entries(userData.drinks)
-    .map(([id, d]) => ({ id, ...d }))
-    .sort((a, b) => a.timestamp - b.timestamp);
+  const drinks=Object.entries(data.drinks).map(([id,d])=>({id,...d})).sort((a,b)=>a.t-b.t);
+  if(!drinks.length)return{now:0,pts:[]};
   
-  if (drinks.length === 0) return { current: 0, timeline: [] };
+  const W=data.peso||70;
+  const r=data.sesso==='M'?0.68:0.55;
+  const beta=0.15; // g/L/ora eliminazione
   
-  const weight = userData.peso;
-  const r = userData.sesso === 'M' ? 0.68 : 0.55; // Widmark factor
-  const metabolismRate = 0.015; // g/L per hour
+  // Tempo di assorbimento in base al cibo
+  const absTime={vuoto:30,medio:60,pieno:90}[data.food||'medio']; // minuti al picco
   
-  // Food factor (slows absorption)
-  const foodFactor = {
-    'vuoto': 1.0,
-    'medio': 0.7,
-    'pieno': 0.5
-  }[userData.food || 'medio'];
+  const now=Date.now();
+  const start=drinks[0].t;
+  const end=now+8*3600000; // +8 ore
+  const pts=[];
   
-  const now = Date.now();
-  const timeline = [];
-  
-  // Calculate BAC at different time points
-  for (let t = drinks[0].timestamp; t <= now + 6 * 3600000; t += 300000) { // ogni 5 min, fino a +6h
-    let bac = 0;
+  for(let t=start;t<=end;t+=300000){ // ogni 5 min
+    let bac=0;
     
-    for (const drink of drinks) {
-      if (drink.timestamp <= t) {
-        const hoursAgo = (t - drink.timestamp) / 3600000;
-        const peakBAC = (drink.gramsAlcohol * foodFactor) / (weight * r * 10);
-        const currentBAC = Math.max(0, peakBAC - (metabolismRate * hoursAgo));
-        bac += currentBAC;
+    for(const drink of drinks){
+      if(drink.t>t)continue;
+      
+      const minsSinceDrink=(t-drink.t)/60000;
+      const peakBAC=drink.g/(W*r*10); // BAC massimo teorico
+      
+      // Fase di ASSORBIMENTO (curva sinusoidale fino al picco)
+      let absorption=1;
+      if(minsSinceDrink<absTime){
+        absorption=Math.sin((minsSinceDrink/absTime)*(Math.PI/2)); // 0→1 graduale
       }
+      
+      // Fase di ELIMINAZIONE (dopo il picco)
+      const hoursAfterPeak=Math.max(0,(minsSinceDrink-absTime)/60);
+      const elimination=beta*hoursAfterPeak;
+      
+      const drinkBAC=Math.max(0,(peakBAC*absorption)-elimination);
+      bac+=drinkBAC;
     }
     
-    timeline.push({
-      time: t,
-      bac: Math.round(bac * 100) / 100
-    });
+    pts.push({t,bac:Math.round(bac*100)/100});
   }
   
-  // Current BAC
-  const currentPoint = timeline.find(p => p.time >= now) || timeline[timeline.length - 1];
-  
-  return {
-    current: currentPoint ? currentPoint.bac : 0,
-    timeline
-  };
+  const nowPt=pts.find(p=>p.t>=now)||pts[pts.length-1];
+  return{now:nowPt?.bac||0,pts};
 }
 
-// Update display
-function updateDisplay(userData) {
-  const { current, timeline } = calculateBAC(userData);
+function update(data){
+  const{now,pts}=calcBAC(data);
   
-  const bacEl = document.getElementById('bacValue');
-  bacEl.textContent = current.toFixed(2);
-  bacEl.className = 'bac-value ' + (
-    current < 0.3 ? 'bac-ok' :
-    current < 0.5 ? 'bac-warn' :
-    current < 0.8 ? 'bac-danger' : 'bac-extreme'
-  );
+  // BAC display
+  const bacEl=document.getElementById('bac');
+  bacEl.textContent=now.toFixed(2);
+  bacEl.className='bac-num '+(now<0.3?'bac-ok':now<0.5?'bac-warn':now<0.8?'bac-danger':'bac-extreme');
   
-  // Drive time
-  const driveEl = document.getElementById('driveTime');
-  if (current < 0.5) {
-    driveEl.className = 'drive-time can-drive';
-    driveEl.innerHTML = '🚗 Puoi guidare! (sotto 0.5 g/L)';
-  } else {
-    // Find when BAC will be under 0.5
-    const safePoint = timeline.find(p => p.time > Date.now() && p.bac < 0.5);
-    if (safePoint) {
-      const waitMs = safePoint.time - Date.now();
-      const hours = Math.floor(waitMs / 3600000);
-      const mins = Math.floor((waitMs % 3600000) / 60000);
-      const safeTime = new Date(safePoint.time).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
-      driveEl.className = 'drive-time wait';
-      driveEl.innerHTML = `⛔ NON GUIDARE!<br>Attendi <strong>${hours}h ${mins}m</strong> (alle ${safeTime})`;
-    } else {
-      driveEl.className = 'drive-time wait';
-      driveEl.innerHTML = '⛔ NON GUIDARE! Aspetta ancora...';
+  // Drive
+  const driveEl=document.getElementById('drive');
+  if(now<0.5){
+    driveEl.className='drive-box drive-ok';
+    driveEl.innerHTML='🚗 Puoi guidare!';
+  }else{
+    const safe=pts.find(p=>p.t>Date.now()&&p.bac<0.5);
+    if(safe){
+      const wait=Math.ceil((safe.t-Date.now())/60000);
+      const h=Math.floor(wait/60),m=wait%60;
+      const time=new Date(safe.t).toLocaleTimeString('it',{hour:'2-digit',minute:'2-digit'});
+      driveEl.className='drive-box drive-wait';
+      driveEl.innerHTML=`⛔ Aspetta ${h}h ${m}m (ore ${time})`;
+    }else{
+      driveEl.className='drive-box drive-wait';
+      driveEl.innerHTML='⛔ NON guidare!';
     }
   }
   
-  // Update chart
-  updateChart(timeline);
+  // Chart
+  const labels=pts.filter((_,i)=>i%3===0).map(p=>new Date(p.t).toLocaleTimeString('it',{hour:'2-digit',minute:'2-digit'}));
+  const values=pts.filter((_,i)=>i%3===0).map(p=>p.bac);
+  const nowIdx=pts.findIndex(p=>p.t>=Date.now());
   
-  // Update history
-  updateHistory(userData.drinks || {});
-}
-
-// Chart
-function updateChart(timeline) {
-  const ctx = document.getElementById('bacChart').getContext('2d');
-  const now = Date.now();
-  
-  const labels = timeline.map(p => {
-    const d = new Date(p.time);
-    return d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
-  });
-  
-  const data = timeline.map(p => p.bac);
-  const nowIndex = timeline.findIndex(p => p.time >= now);
-  
-  const colors = data.map((v, i) => {
-    if (i < nowIndex) return '#3498db';
-    return v < 0.5 ? '#2ecc71' : v < 0.8 ? '#f39c12' : '#e74c3c';
-  });
-  
-  if (chart) {
-    chart.data.labels = labels;
-    chart.data.datasets[0].data = data;
-    chart.data.datasets[0].borderColor = colors;
-    chart.data.datasets[0].pointBackgroundColor = colors;
+  if(chart){
+    chart.data.labels=labels;
+    chart.data.datasets[0].data=values;
     chart.update();
-  } else {
-    chart = new Chart(ctx, {
-      type: 'line',
-      data: {
+  }else{
+    chart=new Chart(ctx,{
+      type:'line',
+      data:{
         labels,
-        datasets: [{
-          label: 'BAC (g/L)',
-          data,
-          borderColor: colors,
-          backgroundColor: 'rgba(233,69,96,0.1)',
-          borderWidth: 3,
-          fill: true,
-          tension: 0.3,
-          pointRadius: 0,
-          pointBackgroundColor: colors
-        }, {
-          label: 'Limite legale',
-          data: Array(labels.length).fill(0.5),
-          borderColor: '#e74c3c',
-          borderWidth: 2,
-          borderDash: [5, 5],
-          pointRadius: 0,
-          fill: false
-        }]
+        datasets:[
+          {label:'BAC',data:values,borderColor:'#e94560',backgroundColor:'#e9456033',fill:true,tension:.4,pointRadius:0},
+          {label:'Limite',data:Array(labels.length).fill(0.5),borderColor:'#e74c3c55',borderDash:[5,5],pointRadius:0,fill:false}
+        ]
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          annotation: {}
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            max: 1.5,
-            grid: { color: '#ffffff11' },
-            ticks: { color: '#888' }
-          },
-          x: {
-            grid: { color: '#ffffff11' },
-            ticks: { color: '#888', maxRotation: 45 }
-          }
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{legend:{display:false}},
+        scales:{
+          y:{beginAtZero:true,max:1.2,grid:{color:'#ffffff11'},ticks:{color:'#666'}},
+          x:{grid:{display:false},ticks:{color:'#666',maxTicksLimit:6}}
         }
       }
     });
   }
-}
-
-// History
-function updateHistory(drinks) {
-  const historyEl = document.getElementById('history');
-  const drinksList = Object.entries(drinks)
-    .map(([id, d]) => ({ id, ...d }))
-    .sort((a, b) => b.timestamp - a.timestamp);
   
-  if (drinksList.length === 0) {
-    historyEl.innerHTML = '<p style="color:#888;text-align:center;padding:20px">Nessuna bevanda registrata</p>';
-    return;
-  }
+  // History
+  const drinks=data.drinks?Object.entries(data.drinks).map(([id,d])=>({id,...d})).sort((a,b)=>b.t-a.t):[];
+  document.getElementById('hist').innerHTML=drinks.length?drinks.map(d=>`
+    <div class="hist-item">
+      <div>
+        <div class="info">${d.e} ${d.n}</div>
+        <div class="time">${new Date(d.t).toLocaleTimeString('it',{hour:'2-digit',minute:'2-digit'})}</div>
+      </div>
+      <button class="del" onclick="del('${d.id}')">✕</button>
+    </div>`).join(''):'<div class="empty">Nessuna bevanda</div>';
   
-  historyEl.innerHTML = drinksList.map(d => `
-    <div class="history-item">
-      <span>${d.emoji} ${d.name}</span>
-      <span>
-        <span class="time">${new Date(d.timestamp).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
-        <button class="remove-btn" onclick="removeDrink('${d.id}')">✕</button>
-      </span>
-    </div>
-  `).join('');
+  // Food
+  const f=data.food||'medio';
+  document.querySelectorAll('.food-btn').forEach(b=>b.classList.toggle('active',b.dataset.f===f));
 }
 
-// Reset session
-window.resetSession = function() {
-  if (confirm('Vuoi iniziare una nuova sessione? I dati attuali verranno cancellati.')) {
-    localStorage.removeItem('alcoTrackerId');
-    localStorage.removeItem('alcoTrackerName');
-    window.location.href = 'index.html';
-  }
-}
-
-// Init
-document.getElementById('userInfo').textContent = `Ciao ${userName}!`;
-renderDrinks();
-
-// Listen to changes
-onValue(ref(db, `alco_users/${userId}`), (snap) => {
-  userData = snap.val();
-  if (userData) {
-    updateDisplay(userData);
-    // Update food button
-    const food = userData.food || 'medio';
-    document.querySelectorAll('.food-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector(`[data-food="${food}"]`)?.classList.add('active');
-  }
-});
+onValue(ref(db,`alco/${uid}`),snap=>{if(snap.exists())update(snap.val());});
 </script>
 </body>
 </html>
