@@ -50,6 +50,25 @@ body{font-family:-apple-system,sans-serif;background:#0f0f1a;color:#fff}
 .chart-box{background:#ffffff08;border-radius:10px;padding:10px;margin-bottom:12px}
 .empty{text-align:center;color:#666;padding:30px}
 .reset{width:100%;padding:12px;border-radius:10px;border:1px solid #e94560;background:transparent;color:#e94560;font-size:14px;cursor:pointer;margin-top:10px}
+
+/* MODAL BICCHIERE */
+.modal{position:fixed;top:0;left:0;right:0;bottom:0;background:#000c;display:none;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.modal.show{display:flex}
+.modal-box{background:#1a1a2e;border-radius:20px;padding:20px;width:100%;max-width:300px;text-align:center}
+.modal-title{font-size:18px;margin-bottom:4px}
+.modal-sub{color:#888;font-size:13px;margin-bottom:16px}
+.glass-wrap{position:relative;width:120px;height:200px;margin:0 auto 16px;cursor:pointer}
+.glass{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:80px;height:180px;border:4px solid #fff;border-top:none;border-radius:0 0 20px 20px;background:#ffffff11;overflow:hidden}
+.glass-fill{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,#e94560,#ff6b6b);transition:height .15s}
+.glass-marks{position:absolute;right:-30px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:space-between;font-size:10px;color:#666;padding:10px 0}
+.glass-ml{font-size:32px;font-weight:800;color:#e94560;margin:8px 0}
+.modal-btns{display:flex;gap:8px;margin-top:12px}
+.modal-btn{flex:1;padding:14px;border-radius:10px;border:none;font-size:15px;font-weight:600;cursor:pointer}
+.modal-btn.cancel{background:#333;color:#fff}
+.modal-btn.confirm{background:#e94560;color:#fff}
+.quick-btns{display:flex;gap:6px;justify-content:center;margin-bottom:12px}
+.quick-btn{padding:8px 12px;border-radius:8px;background:#ffffff11;border:none;color:#fff;font-size:12px;cursor:pointer}
+.quick-btn:active{background:#ffffff22}
 </style>
 </head>
 <body>
@@ -110,6 +129,41 @@ body{font-family:-apple-system,sans-serif;background:#0f0f1a;color:#fff}
   </div>
 </div>
 
+<!-- MODAL BICCHIERE -->
+<div class="modal" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="modal-title" id="modalTitle">🍺 Birra</div>
+    <div class="modal-sub">Tocca il bicchiere per indicare il livello</div>
+    
+    <div class="quick-btns">
+      <button class="quick-btn" onclick="setLevel(25)">¼</button>
+      <button class="quick-btn" onclick="setLevel(50)">½</button>
+      <button class="quick-btn" onclick="setLevel(75)">¾</button>
+      <button class="quick-btn" onclick="setLevel(100)">Pieno</button>
+    </div>
+    
+    <div class="glass-wrap" id="glassWrap">
+      <div class="glass">
+        <div class="glass-fill" id="glassFill" style="height:100%"></div>
+      </div>
+      <div class="glass-marks">
+        <span>100%</span>
+        <span>75%</span>
+        <span>50%</span>
+        <span>25%</span>
+        <span>0%</span>
+      </div>
+    </div>
+    
+    <div class="glass-ml"><span id="mlValue">330</span> ml</div>
+    
+    <div class="modal-btns">
+      <button class="modal-btn cancel" onclick="closeModal()">Annulla</button>
+      <button class="modal-btn confirm" onclick="confirmDrink()">✓ Aggiungi</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import{getDatabase,ref,set,onValue,remove}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -147,13 +201,57 @@ if(!uid){location.href='index.html';}
 document.getElementById('userName').textContent=uname;
 
 let chart;
+let selectedDrink=null;
+let selectedLevel=100;
 
 // Render drinks
 document.getElementById('drinks').innerHTML=DRINKS.map((d,i)=>`
-  <button class="drink" onclick="add(${i})">
+  <button class="drink" onclick="openModal(${i})">
     <span class="em">${d.e}</span>
     <div class="nm">${d.n}</div>
   </button>`).join('');
+
+// Modal functions
+window.openModal=(i)=>{
+  selectedDrink=DRINKS[i];
+  selectedLevel=100;
+  document.getElementById('modalTitle').textContent=`${selectedDrink.e} ${selectedDrink.n}`;
+  updateGlass();
+  document.getElementById('modal').classList.add('show');
+};
+
+window.closeModal=()=>{
+  document.getElementById('modal').classList.remove('show');
+};
+
+window.setLevel=(pct)=>{
+  selectedLevel=pct;
+  updateGlass();
+};
+
+function updateGlass(){
+  document.getElementById('glassFill').style.height=selectedLevel+'%';
+  const ml=Math.round(selectedDrink.ml*(selectedLevel/100));
+  document.getElementById('mlValue').textContent=ml;
+}
+
+// Touch/click on glass
+document.getElementById('glassWrap').addEventListener('click',(e)=>{
+  const rect=e.currentTarget.getBoundingClientRect();
+  const y=e.clientY-rect.top;
+  const pct=Math.round(Math.max(0,Math.min(100,(1-y/rect.height)*100)));
+  selectedLevel=pct;
+  updateGlass();
+});
+
+window.confirmDrink=async()=>{
+  const ml=Math.round(selectedDrink.ml*(selectedLevel/100));
+  const g=ml*(selectedDrink.a/100)*0.789;
+  await set(ref(db,`alco/${uid}/drinks/d${Date.now()}`),{
+    n:selectedDrink.n,e:selectedDrink.e,ml,g,t:Date.now()
+  });
+  closeModal();
+};
 
 window.showTab=(i)=>{
   document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i===j));
@@ -163,13 +261,6 @@ window.showTab=(i)=>{
 window.setFood=async(f)=>{
   document.querySelectorAll('.food-btn').forEach(b=>b.classList.toggle('active',b.dataset.f===f));
   await set(ref(db,`alco/${uid}/food`),f);
-};
-
-window.add=async(i)=>{
-  const d=DRINKS[i];
-  await set(ref(db,`alco/${uid}/drinks/d${Date.now()}`),{
-    n:d.n,e:d.e,ml:d.ml,g:d.ml*(d.a/100)*0.789,t:Date.now()
-  });
 };
 
 window.del=async(id)=>{await remove(ref(db,`alco/${uid}/drinks/${id}`));};
@@ -210,7 +301,6 @@ function update(data){
   const{now,pts}=calcBAC(data);
   const drinks=data?.drinks?Object.entries(data.drinks).map(([id,d])=>({id,...d})):[];
   
-  // Stats
   const bacEl=document.getElementById('bac');
   bacEl.textContent=now.toFixed(2);
   bacEl.className='num '+(now<0.3?'bac-ok':now<0.5?'bac-warn':now<0.8?'bac-danger':'bac-extreme');
@@ -219,7 +309,6 @@ function update(data){
   document.getElementById('totalMl').textContent=totalMl;
   document.getElementById('totalDrinks').textContent=drinks.length;
   
-  // Drive
   const drv=document.getElementById('drive');
   if(now<0.5){
     drv.className='drive-box drive-ok';
@@ -236,7 +325,6 @@ function update(data){
     }
   }
   
-  // Chart
   if(pts.length){
     const labels=pts.filter((_,i)=>i%4===0).map(p=>new Date(p.t).toLocaleTimeString('it',{hour:'2-digit',minute:'2-digit'}));
     const values=pts.filter((_,i)=>i%4===0).map(p=>p.bac);
@@ -260,25 +348,21 @@ function update(data){
     }
   }
   
-  // History
   document.getElementById('hist').innerHTML=drinks.length?drinks.sort((a,b)=>b.t-a.t).map(d=>`
     <div class="hist-item">
       <span>${d.e} ${d.n} <span style="color:#666">${d.ml}ml</span></span>
       <button class="del" onclick="del('${d.id}')">✕</button>
     </div>`).join(''):'<div class="empty">Nessuna bevanda</div>';
   
-  // Food
   document.querySelectorAll('.food-btn').forEach(b=>b.classList.toggle('active',b.dataset.f===(data?.food||'medio')));
 }
 
-// Leaderboard
 onValue(ref(db,'alco'),snap=>{
   const all=snap.val()||{};
   const users=Object.entries(all).map(([id,u])=>{
     const drinks=u.drinks?Object.values(u.drinks):[];
     const ml=drinks.reduce((s,d)=>s+(d.ml||0),0);
-    const count=drinks.length;
-    return{id,name:u.nome||'???',ml,count};
+    return{id,name:u.nome||'???',ml,count:drinks.length};
   }).filter(u=>u.ml>0).sort((a,b)=>b.ml-a.ml);
   
   const medals=['🥇','🥈','🥉'];
