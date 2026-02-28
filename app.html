@@ -42,22 +42,33 @@ body{font-family:-apple-system,sans-serif;background:#0f0f1a;color:#fff}
 .drink .nm{font-size:10px;margin-top:2px;line-height:1.1}
 .hist-item{display:flex;justify-content:space-between;align-items:center;padding:10px;background:#ffffff08;border-radius:8px;margin-bottom:6px;font-size:13px}
 .hist-item .del{background:#e74c3c;border:none;color:#fff;width:26px;height:26px;border-radius:6px;cursor:pointer;font-size:12px}
-.leader{margin-bottom:8px;padding:12px;background:#ffffff08;border-radius:10px;display:flex;align-items:center;gap:12px}
+.leader{margin-bottom:8px;padding:12px;background:#ffffff08;border-radius:10px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .2s}
+.leader:active{background:#ffffff15}
 .leader .pos{font-size:24px;width:36px;text-align:center}
 .leader .info{flex:1}
 .leader .name{font-weight:700;font-size:15px}
 .leader .detail{color:#888;font-size:11px}
+.leader .bac-status{font-size:11px;margin-top:2px}
 .leader .ml{font-size:18px;font-weight:800;color:#e94560}
 .chart-box{background:#ffffff08;border-radius:10px;padding:10px;margin-bottom:12px}
 .empty{text-align:center;color:#666;padding:30px}
 .reset{width:100%;padding:12px;border-radius:10px;border:1px solid #e94560;background:transparent;color:#e94560;font-size:14px;cursor:pointer;margin-top:10px}
-
-/* MODAL BICCHIERE */
 .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:#000c;display:none;align-items:center;justify-content:center;z-index:1000;padding:20px}
 .modal.show{display:flex}
-.modal-box{background:#1a1a2e;border-radius:20px;padding:20px;width:100%;max-width:300px;text-align:center}
-.modal-title{font-size:18px;margin-bottom:4px}
+.modal-box{background:#1a1a2e;border-radius:20px;padding:20px;width:100%;max-width:340px;max-height:80vh;overflow-y:auto}
+.modal-title{font-size:20px;margin-bottom:4px;display:flex;align-items:center;gap:8px}
 .modal-sub{color:#888;font-size:13px;margin-bottom:16px}
+.modal-close{position:absolute;top:16px;right:16px;background:#333;border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px}
+.detail-stat{display:flex;justify-content:space-between;padding:12px;background:#ffffff08;border-radius:10px;margin-bottom:8px}
+.detail-stat .label{color:#888;font-size:13px}
+.detail-stat .value{font-weight:700;font-size:15px}
+.detail-drinks{margin-top:12px}
+.detail-drinks h4{font-size:14px;margin-bottom:8px;color:#888}
+.detail-drink{padding:8px;background:#ffffff05;border-radius:8px;margin-bottom:4px;font-size:13px;display:flex;justify-content:space-between}
+.timer-box{background:#e9456022;border:1px solid #e94560;border-radius:10px;padding:12px;margin-bottom:12px;text-align:center}
+.timer-box.safe{background:#2ecc7122;border-color:#2ecc71}
+.timer-box .timer-label{font-size:12px;color:#888}
+.timer-box .timer-value{font-size:24px;font-weight:800;margin-top:4px}
 .glass-wrap{position:relative;width:120px;height:200px;margin:0 auto 16px;cursor:pointer}
 .glass{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:80px;height:180px;border:4px solid #fff;border-top:none;border-radius:0 0 20px 20px;background:#ffffff11;overflow:hidden}
 .glass-fill{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,#e94560,#ff6b6b);transition:height .15s}
@@ -69,7 +80,6 @@ body{font-family:-apple-system,sans-serif;background:#0f0f1a;color:#fff}
 .modal-btn.confirm{background:#e94560;color:#fff}
 .quick-btns{display:flex;gap:6px;justify-content:center;margin-bottom:12px}
 .quick-btn{padding:8px 12px;border-radius:8px;background:#ffffff11;border:none;color:#fff;font-size:12px;cursor:pointer}
-.quick-btn:active{background:#ffffff22}
 </style>
 </head>
 <body>
@@ -128,7 +138,7 @@ body{font-family:-apple-system,sans-serif;background:#0f0f1a;color:#fff}
     </div>
     
     <div class="panel" id="p2">
-      <h4 style="margin-bottom:12px;font-size:14px">🏆 Chi ha bevuto di più?</h4>
+      <h4 style="margin-bottom:12px;font-size:14px">🏆 Tocca un utente per i dettagli</h4>
       <div id="leaderboard"><div class="empty">Nessun partecipante</div></div>
     </div>
   </div>
@@ -139,32 +149,55 @@ body{font-family:-apple-system,sans-serif;background:#0f0f1a;color:#fff}
   <div class="modal-box">
     <div class="modal-title" id="modalTitle">🍺 Birra</div>
     <div class="modal-sub">Tocca il bicchiere per indicare il livello</div>
-    
     <div class="quick-btns">
       <button class="quick-btn" onclick="setLevel(25)">¼</button>
       <button class="quick-btn" onclick="setLevel(50)">½</button>
       <button class="quick-btn" onclick="setLevel(75)">¾</button>
       <button class="quick-btn" onclick="setLevel(100)">Pieno</button>
     </div>
-    
     <div class="glass-wrap" id="glassWrap">
-      <div class="glass">
-        <div class="glass-fill" id="glassFill" style="height:100%"></div>
-      </div>
-      <div class="glass-marks">
-        <span>100%</span>
-        <span>75%</span>
-        <span>50%</span>
-        <span>25%</span>
-        <span>0%</span>
-      </div>
+      <div class="glass"><div class="glass-fill" id="glassFill" style="height:100%"></div></div>
+      <div class="glass-marks"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div>
     </div>
-    
     <div class="glass-ml"><span id="mlValue">330</span> ml</div>
-    
     <div class="modal-btns">
       <button class="modal-btn cancel" onclick="closeModal()">Annulla</button>
       <button class="modal-btn confirm" onclick="confirmDrink()">✓ Aggiungi</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETTAGLIO UTENTE -->
+<div class="modal" id="userModal" onclick="if(event.target===this)closeUserModal()">
+  <div class="modal-box">
+    <div class="modal-title" id="userModalTitle">👤 Nome</div>
+    <div class="modal-sub" id="userModalSub">Dettagli</div>
+    
+    <div id="userTimerBox" class="timer-box">
+      <div class="timer-label">⏱️ Tempo al limite 0.5 g/L</div>
+      <div class="timer-value" id="userTimerValue">--:--</div>
+    </div>
+    
+    <div class="detail-stat">
+      <span class="label">Tasso attuale</span>
+      <span class="value" id="userBac">0.00 g/L</span>
+    </div>
+    <div class="detail-stat">
+      <span class="label">Totale bevuto</span>
+      <span class="value" id="userMl">0 ml</span>
+    </div>
+    <div class="detail-stat">
+      <span class="label">Numero bevande</span>
+      <span class="value" id="userCount">0</span>
+    </div>
+    
+    <div class="detail-drinks">
+      <h4>🍺 Cosa ha bevuto:</h4>
+      <div id="userDrinksList"></div>
+    </div>
+    
+    <div class="modal-btns" style="margin-top:16px">
+      <button class="modal-btn cancel" onclick="closeUserModal()">Chiudi</button>
     </div>
   </div>
 </div>
@@ -208,15 +241,11 @@ document.getElementById('userName').textContent=uname;
 let chart;
 let selectedDrink=null;
 let selectedLevel=100;
+let allUsersData={};
 
-// Render drinks
 document.getElementById('drinks').innerHTML=DRINKS.map((d,i)=>`
-  <button class="drink" onclick="openModal(${i})">
-    <span class="em">${d.e}</span>
-    <div class="nm">${d.n}</div>
-  </button>`).join('');
+  <button class="drink" onclick="openModal(${i})"><span class="em">${d.e}</span><div class="nm">${d.n}</div></button>`).join('');
 
-// Modal functions
 window.openModal=(i)=>{
   selectedDrink=DRINKS[i];
   selectedLevel=100;
@@ -224,37 +253,20 @@ window.openModal=(i)=>{
   updateGlass();
   document.getElementById('modal').classList.add('show');
 };
-
-window.closeModal=()=>{
-  document.getElementById('modal').classList.remove('show');
-};
-
-window.setLevel=(pct)=>{
-  selectedLevel=pct;
-  updateGlass();
-};
-
+window.closeModal=()=>{document.getElementById('modal').classList.remove('show');};
+window.setLevel=(pct)=>{selectedLevel=pct;updateGlass();};
 function updateGlass(){
   document.getElementById('glassFill').style.height=selectedLevel+'%';
-  const ml=Math.round(selectedDrink.ml*(selectedLevel/100));
-  document.getElementById('mlValue').textContent=ml;
+  document.getElementById('mlValue').textContent=Math.round(selectedDrink.ml*(selectedLevel/100));
 }
-
-// Touch/click on glass
 document.getElementById('glassWrap').addEventListener('click',(e)=>{
   const rect=e.currentTarget.getBoundingClientRect();
-  const y=e.clientY-rect.top;
-  const pct=Math.round(Math.max(0,Math.min(100,(1-y/rect.height)*100)));
-  selectedLevel=pct;
+  selectedLevel=Math.round(Math.max(0,Math.min(100,(1-(e.clientY-rect.top)/rect.height)*100)));
   updateGlass();
 });
-
 window.confirmDrink=async()=>{
   const ml=Math.round(selectedDrink.ml*(selectedLevel/100));
-  const g=ml*(selectedDrink.a/100)*0.789;
-  await set(ref(db,`alco/${uid}/drinks/d${Date.now()}`),{
-    n:selectedDrink.n,e:selectedDrink.e,ml,g,t:Date.now()
-  });
+  await set(ref(db,`alco/${uid}/drinks/d${Date.now()}`),{n:selectedDrink.n,e:selectedDrink.e,ml,g:ml*(selectedDrink.a/100)*0.789,t:Date.now()});
   closeModal();
 };
 
@@ -262,32 +274,25 @@ window.showTab=(i)=>{
   document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i===j));
   document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('active',i===j));
 };
-
 window.setFood=async(f)=>{
   document.querySelectorAll('.food-btn').forEach(b=>b.classList.toggle('active',b.dataset.f===f));
   await set(ref(db,`alco/${uid}/food`),f);
 };
-
 window.del=async(id)=>{await remove(ref(db,`alco/${uid}/drinks/${id}`));};
+window.reset=()=>{if(confirm('Nuova sessione?')){localStorage.clear();location.href='index.html';}};
 
-window.reset=()=>{
-  if(confirm('Nuova sessione?')){
-    localStorage.clear();
-    location.href='index.html';
-  }
-};
-
-function calcBAC(data){
-  if(!data?.drinks)return{now:0,pts:[]};
+// Calcolo BAC con curve
+function calcBACForUser(data){
+  if(!data?.drinks)return{now:0,pts:[],peakTime:null,safeTime:null};
   const drinks=Object.values(data.drinks).sort((a,b)=>a.t-b.t);
-  if(!drinks.length)return{now:0,pts:[]};
+  if(!drinks.length)return{now:0,pts:[],peakTime:null,safeTime:null};
   
   const W=data.peso||70,r=data.sesso==='M'?0.68:0.55,beta=0.15;
   const absTime={vuoto:30,medio:60,pieno:90}[data.food||'medio'];
-  const now=Date.now(),start=drinks[0].t,end=now+6*3600000;
+  const now=Date.now(),start=drinks[0].t,end=now+8*3600000;
   const pts=[];
   
-  for(let t=start;t<=end;t+=300000){
+  for(let t=start;t<=end;t+=60000){
     let bac=0;
     for(const d of drinks){
       if(d.t>t)continue;
@@ -299,101 +304,164 @@ function calcBAC(data){
     }
     pts.push({t,bac:Math.round(bac*100)/100});
   }
-  return{now:pts.find(p=>p.t>=now)?.bac||0,pts};
+  
+  const nowPt=pts.find(p=>p.t>=now)||pts[pts.length-1];
+  const currentBac=nowPt?.bac||0;
+  
+  // Trova picco e tempo safe
+  let peakTime=null,safeTime=null;
+  const futurePts=pts.filter(p=>p.t>now);
+  
+  // Se BAC sta salendo, trova quando raggiunge 0.5
+  if(currentBac<0.5){
+    const crossUp=futurePts.find((p,i)=>i>0&&p.bac>=0.5&&futurePts[i-1].bac<0.5);
+    if(crossUp)peakTime=crossUp.t;
+  }
+  
+  // Trova quando scende sotto 0.5
+  if(currentBac>=0.5||peakTime){
+    const crossDown=futurePts.find((p,i)=>i>0&&p.bac<0.5&&futurePts[i-1].bac>=0.5);
+    if(crossDown)safeTime=crossDown.t;
+  }
+  
+  return{now:currentBac,pts,peakTime,safeTime};
 }
 
 function update(data){
-  const{now,pts}=calcBAC(data);
+  const{now,pts,safeTime}=calcBACForUser(data);
   const drinks=data?.drinks?Object.entries(data.drinks).map(([id,d])=>({id,...d})):[];
   
   const bacEl=document.getElementById('bac');
   bacEl.textContent=now.toFixed(2);
   bacEl.className='num '+(now<0.3?'bac-ok':now<0.5?'bac-warn':now<0.8?'bac-danger':'bac-extreme');
   
-  const totalMl=drinks.reduce((s,d)=>s+(d.ml||0),0);
-  document.getElementById('totalMl').textContent=totalMl;
+  document.getElementById('totalMl').textContent=drinks.reduce((s,d)=>s+(d.ml||0),0);
   document.getElementById('totalDrinks').textContent=drinks.length;
   
   const drv=document.getElementById('drive');
   if(now<0.5){
     drv.className='drive-box drive-ok';
     drv.innerHTML='🚗 Puoi guidare!';
+  }else if(safeTime){
+    const m=Math.ceil((safeTime-Date.now())/60000);
+    drv.className='drive-box drive-wait';
+    drv.innerHTML=`⛔ Aspetta ${Math.floor(m/60)}h ${m%60}m`;
   }else{
-    const safe=pts.find(p=>p.t>Date.now()&&p.bac<0.5);
-    if(safe){
-      const m=Math.ceil((safe.t-Date.now())/60000);
-      drv.className='drive-box drive-wait';
-      drv.innerHTML=`⛔ Aspetta ${Math.floor(m/60)}h ${m%60}m`;
-    }else{
-      drv.className='drive-box drive-wait';
-      drv.innerHTML='⛔ NON guidare!';
-    }
+    drv.className='drive-box drive-wait';
+    drv.innerHTML='⛔ NON guidare!';
   }
   
   if(pts.length){
-    const labels=pts.filter((_,i)=>i%4===0).map(p=>new Date(p.t).toLocaleTimeString('it',{hour:'2-digit',minute:'2-digit'}));
-    const values=pts.filter((_,i)=>i%4===0).map(p=>p.bac);
+    const labels=pts.filter((_,i)=>i%5===0).map(p=>new Date(p.t).toLocaleTimeString('it',{hour:'2-digit',minute:'2-digit'}));
+    const values=pts.filter((_,i)=>i%5===0).map(p=>p.bac);
     const ctx=document.getElementById('chart');
-    if(chart){
-      chart.data.labels=labels;
-      chart.data.datasets[0].data=values;
-      chart.update();
-    }else{
-      chart=new Chart(ctx,{
-        type:'line',
-        data:{
-          labels,
-          datasets:[
-            {data:values,borderColor:'#e94560',backgroundColor:'#e9456033',fill:true,tension:.4,pointRadius:0},
-            {data:Array(labels.length).fill(0.5),borderColor:'#e74c3c55',borderDash:[5,5],pointRadius:0}
-          ]
-        },
-        options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:1.2,grid:{color:'#ffffff11'}},x:{grid:{display:false},ticks:{maxTicksLimit:5}}}}
-      });
+    if(chart){chart.data.labels=labels;chart.data.datasets[0].data=values;chart.update();}
+    else{
+      chart=new Chart(ctx,{type:'line',data:{labels,datasets:[
+        {data:values,borderColor:'#e94560',backgroundColor:'#e9456033',fill:true,tension:.4,pointRadius:0},
+        {data:Array(labels.length).fill(0.5),borderColor:'#e74c3c55',borderDash:[5,5],pointRadius:0}
+      ]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:Math.max(1.2,...values)+0.2,grid:{color:'#ffffff11'}},x:{grid:{display:false},ticks:{maxTicksLimit:6}}}}});
     }
   }
   
   document.getElementById('hist').innerHTML=drinks.length?drinks.sort((a,b)=>b.t-a.t).map(d=>`
-    <div class="hist-item">
-      <span>${d.e} ${d.n} <span style="color:#666">${d.ml}ml</span></span>
-      <button class="del" onclick="del('${d.id}')">✕</button>
-    </div>`).join(''):'<div class="empty">Nessuna bevanda</div>';
+    <div class="hist-item"><span>${d.e} ${d.n} <span style="color:#666">${d.ml}ml</span></span>
+    <button class="del" onclick="del('${d.id}')">✕</button></div>`).join(''):'<div class="empty">Nessuna bevanda</div>';
   
   document.querySelectorAll('.food-btn').forEach(b=>b.classList.toggle('active',b.dataset.f===(data?.food||'medio')));
 }
 
+// User detail modal
+window.openUserModal=(userId)=>{
+  const data=allUsersData[userId];
+  if(!data)return;
+  
+  const{now,peakTime,safeTime}=calcBACForUser(data);
+  const drinks=data.drinks?Object.values(data.drinks).sort((a,b)=>b.t-a.t):[];
+  const totalMl=drinks.reduce((s,d)=>s+(d.ml||0),0);
+  
+  document.getElementById('userModalTitle').textContent=`👤 ${data.nome}`;
+  document.getElementById('userModalSub').textContent=`${data.peso}kg · ${data.sesso==='M'?'Uomo':'Donna'}`;
+  document.getElementById('userBac').textContent=now.toFixed(2)+' g/L';
+  document.getElementById('userBac').style.color=now<0.5?'#2ecc71':'#e74c3c';
+  document.getElementById('userMl').textContent=totalMl+' ml';
+  document.getElementById('userCount').textContent=drinks.length;
+  
+  // Timer
+  const timerBox=document.getElementById('userTimerBox');
+  const timerVal=document.getElementById('userTimerValue');
+  
+  if(now<0.5&&peakTime){
+    // Sta salendo verso 0.5
+    const m=Math.ceil((peakTime-Date.now())/60000);
+    timerBox.className='timer-box';
+    timerBox.querySelector('.timer-label').textContent='📈 Raggiungerà 0.5 g/L tra:';
+    timerVal.textContent=`${Math.floor(m/60)}h ${m%60}m`;
+    timerVal.style.color='#f39c12';
+  }else if(now>=0.5&&safeTime){
+    // Sopra 0.5, scenderà
+    const m=Math.ceil((safeTime-Date.now())/60000);
+    timerBox.className='timer-box';
+    timerBox.querySelector('.timer-label').textContent='📉 Tornerà sotto 0.5 g/L tra:';
+    timerVal.textContent=`${Math.floor(m/60)}h ${m%60}m`;
+    timerVal.style.color='#e94560';
+  }else if(now<0.5){
+    timerBox.className='timer-box safe';
+    timerBox.querySelector('.timer-label').textContent='✅ Stato';
+    timerVal.textContent='OK!';
+    timerVal.style.color='#2ecc71';
+  }else{
+    timerBox.className='timer-box';
+    timerBox.querySelector('.timer-label').textContent='⏳ Calcolo...';
+    timerVal.textContent='--:--';
+  }
+  
+  // Drinks list
+  document.getElementById('userDrinksList').innerHTML=drinks.length?drinks.map(d=>`
+    <div class="detail-drink">
+      <span>${d.e} ${d.n}</span>
+      <span>${d.ml}ml · ${new Date(d.t).toLocaleTimeString('it',{hour:'2-digit',minute:'2-digit'})}</span>
+    </div>`).join(''):'<div class="empty">Nessuna bevanda</div>';
+  
+  document.getElementById('userModal').classList.add('show');
+};
+window.closeUserModal=()=>{document.getElementById('userModal').classList.remove('show');};
+
+// Leaderboard
 onValue(ref(db,'alco'),snap=>{
-  const all=snap.val()||{};
-  const users=Object.entries(all).map(([id,u])=>{
+  allUsersData=snap.val()||{};
+  const users=Object.entries(allUsersData).map(([id,u])=>{
     const drinks=u.drinks?Object.values(u.drinks):[];
     const ml=drinks.reduce((s,d)=>s+(d.ml||0),0);
-    return{id,name:u.nome||'???',ml,count:drinks.length};
+    const{now,peakTime,safeTime}=calcBACForUser(u);
+    return{id,name:u.nome||'???',ml,count:drinks.length,bac:now,peakTime,safeTime};
   }).filter(u=>u.ml>0).sort((a,b)=>b.ml-a.ml);
   
   const medals=['🥇','🥈','🥉'];
-  document.getElementById('leaderboard').innerHTML=users.length?users.map((u,i)=>`
-    <div class="leader">
+  document.getElementById('leaderboard').innerHTML=users.length?users.map((u,i)=>{
+    let status='';
+    if(u.bac<0.5&&u.peakTime){
+      const m=Math.ceil((u.peakTime-Date.now())/60000);
+      status=`<div class="bac-status" style="color:#f39c12">📈 0.5 tra ${m}min</div>`;
+    }else if(u.bac>=0.5&&u.safeTime){
+      const m=Math.ceil((u.safeTime-Date.now())/60000);
+      status=`<div class="bac-status" style="color:#e94560">📉 OK tra ${Math.floor(m/60)}h${m%60}m</div>`;
+    }else if(u.bac<0.5){
+      status=`<div class="bac-status" style="color:#2ecc71">✅ Può guidare</div>`;
+    }else{
+      status=`<div class="bac-status" style="color:#e94560">⛔ ${u.bac.toFixed(2)} g/L</div>`;
+    }
+    return`<div class="leader" onclick="openUserModal('${u.id}')">
       <div class="pos">${medals[i]||i+1}</div>
-      <div class="info">
-        <div class="name">${u.name}</div>
-        <div class="detail">${u.count} bevande</div>
-      </div>
+      <div class="info"><div class="name">${u.name}</div><div class="detail">${u.count} bevande</div>${status}</div>
       <div class="ml">${u.ml}ml</div>
-    </div>`).join(''):'<div class="empty">Nessun partecipante</div>';
+    </div>`;
+  }).join(''):'<div class="empty">Nessun partecipante</div>';
 });
 
 let lastData=null;
-onValue(ref(db,`alco/${uid}`),snap=>{
-  if(snap.exists()){
-    lastData=snap.val();
-    update(lastData);
-  }
-});
-
-// Auto-refresh ogni 30 secondi per ricalcolare il BAC (che cambia nel tempo)
-setInterval(()=>{
-  if(lastData)update(lastData);
-},30000);
+onValue(ref(db,`alco/${uid}`),snap=>{if(snap.exists()){lastData=snap.val();update(lastData);}});
+setInterval(()=>{if(lastData)update(lastData);},30000);
 </script>
 </body>
 </html>
