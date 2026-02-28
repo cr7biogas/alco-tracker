@@ -24,6 +24,7 @@ body{font-family:-apple-system,sans-serif;background:#0f0f1a;color:#fff}
 .drive-box{padding:10px;border-radius:10px;text-align:center;font-size:13px;font-weight:600}
 .drive-ok{background:#2ecc7122;color:#2ecc71}
 .drive-wait{background:#e74c3c22;color:#e74c3c}
+.info-banner{background:#f39c1222;color:#f39c12;padding:10px 12px;font-size:12px;text-align:center;cursor:pointer;border-bottom:1px solid #f39c1244}
 .tabs{display:flex;padding:0 12px;gap:4px;flex-shrink:0}
 .tab{flex:1;padding:10px;border:none;border-radius:10px 10px 0 0;font-size:13px;font-weight:600;cursor:pointer}
 .tab.active{background:#1a1a2e;color:#fff}
@@ -95,6 +96,10 @@ body{font-family:-apple-system,sans-serif;background:#0f0f1a;color:#fff}
   
   <div class="drive">
     <div class="drive-box drive-ok" id="drive">🚗 Puoi guidare!</div>
+  </div>
+  
+  <div class="info-banner" onclick="this.style.display='none'">
+    ⚠️ <b>L'alcol sale gradualmente!</b> Picco dopo 30-60 min. Guarda il grafico 📈 <span style="color:#888">(tocca per chiudere)</span>
   </div>
   
   <div class="tabs">
