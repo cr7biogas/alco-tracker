@@ -287,7 +287,7 @@ function calcBAC(data){
     for(const d of drinks){
       if(d.t>t)continue;
       const mins=(t-d.t)/60000;
-      const peak=d.g/(W*r*10);
+      const peak=d.g/(W*r);
       const abs=mins<absTime?Math.sin((mins/absTime)*(Math.PI/2)):1;
       const elim=beta*Math.max(0,(mins-absTime)/60);
       bac+=Math.max(0,peak*abs-elim);
